@@ -1,0 +1,103 @@
+# Basketball Dataset Creation Pipeline - Configuration
+
+# Frame Extraction Settings
+frame_extraction:
+  # Adaptive frame extraction based on dataset size
+  small_dataset_threshold: 10 # Number of videos to consider dataset as "small"
+  small_dataset_interval: 5 # Extract every 5th frame for small datasets
+  large_dataset_interval: 5 # Extract every 5th frame for large datasets
+
+  # Video processing
+  max_frames_per_video: null # Set to null for no limit, or specify a number
+  start_time: 0 # Start time in seconds (0 = beginning)
+  end_time: null # End time in seconds (null = end of video)
+
+# Quality filtering step removed
+
+# Classes for Basketball Detection (YOLO)
+classes:
+  - ball
+  - jersey_number
+  - net
+  - team_a
+  - team_b
+
+# Data Augmentation Settings
+augmentation:
+  enabled: true
+  augmentations_per_image: 3 # Number of augmented variants per image
+
+  # Augmentation probabilities (0.0-1.0)
+  brightness_probability: 0.7
+  contrast_probability: 0.5
+  flip_probability: 0.5 # Horizontal flip only (basketball OK to flip)
+  rotation_probability: 0.3 # Small rotations only
+  zoom_probability: 0.3
+  noise_probability: 0.2
+
+  # Augmentation parameters
+  brightness_range: [-30, 30] # Brightness adjustment range
+  contrast_range: [0.8, 1.2] # Contrast factor range
+  rotation_range: [-10, 10] # Rotation angle range (degrees)
+  zoom_range: [0.9, 1.1] # Zoom factor range
+  noise_std: 10 # Gaussian noise standard deviation
+
+# Output Settings
+output:
+  save_metadata: true # Save extraction metadata (frame info, timestamps)
+  frame_format: "jpg" # Output format: jpg, png
+  frame_quality: 95 # JPEG quality (1-100)
+
+  # Folder organization
+  organize_by_video: true # Create separate folder for each video
+  folder_prefix: "video_" # Prefix for video folders
+
+# Logging
+logging:
+  level: "INFO" # DEBUG, INFO, WARNING, ERROR
+  save_logs: true
+  log_file: "pipeline.log"
+
+# Dataset Split Settings (Phase 4)
+split:
+  # Split strategy
+  split_by: "video" # 'video' supported (assign whole video folders to a split)
+
+  # Ratios (should sum to 1.0)
+  train_ratio: 0.8
+  val_ratio: 0.1
+  test_ratio: 0.1
+
+  # Reproducibility
+  seed: 42
+
+  # IO paths
+  input_dir: "data/augmented" # Source: augmented dataset organized by video_*/
+  output_dir: "data/yolo_dataset" # Destination: YOLO-ready structure
+
+  # Labels handling
+  create_empty_labels: true # If a label .txt is missing, create an empty file
+
+# Training Settings (Phase 5)
+training:
+  # Model selection (Ultralytics hub names or local .pt)
+  model: "yolov8s.pt" # good balance for RTX 3050
+
+  # Hyperparameters
+  epochs: 1
+  imgsz: 640
+  batch: 8
+  workers: 2 # Windows: keep small
+  seed: 42
+  device: 0 # GPU index; use -1 for CPU
+  freeze: 10 # freeze backbone for first epochs
+
+  # Paths
+  data_yaml: "data/yolo_dataset/data.yaml"
+  project: "runs/train"
+  name: "basketball-yolov8s"
+
+  # Advanced
+  save: true
+  exist_ok: true
+  verbose: true

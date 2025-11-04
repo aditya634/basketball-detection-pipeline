@@ -1,0 +1,21 @@
+# Basketball Dataset Creation Pipeline - Requirements
+# Phase 1: Frame Extraction and Quality Filtering
+
+# Core dependencies
+opencv-python>=4.8.0
+numpy>=1.26.0
+PyYAML>=6.0
+
+# Optional: Better quality metrics (recommended but not required)
+# scikit-image>=0.22.0
+
+# Image utilities
+Pillow>=10.0.0
+
+# Optional: Progress bars
+# tqdm>=4.65.0
+
+# Phase 5: Training (Ultralytics YOLO)
+# Note: On Windows with NVIDIA GPU, install a CUDA-enabled PyTorch separately for best performance
+# See https://pytorch.org/get-started/locally/ for the correct pip command.
+ultralytics>=8.3.0

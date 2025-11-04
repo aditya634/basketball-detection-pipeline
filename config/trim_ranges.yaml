@@ -1,0 +1,30 @@
+# Basketball Video Trim Configuration
+# Define time ranges to extract match sections (removes breaks/pauses)
+
+output_dir: "data/all_video_frames"
+
+videos:
+  # Example: courtMumbai_vid12.mp4
+  # Extract: 0-15min (match), 25-35min (match), 45-55min (match)
+  - input: "source_videos/courtMumbai_vid12.mp4"
+    ranges:
+      - "0:00-15:00" # First match section (15 minutes)
+      - "25:00-35:00" # Second match section (10 minutes)
+      - "45:00-55:00" # Third match section (10 minutes)
+
+  # Example: courtDelhi_vid07.mp4
+  - input: "source_videos/courtDelhi_vid07.mp4"
+    ranges:
+      - "2:00-18:00" # First match section
+      - "30:00-42:00" # Second match section
+
+
+  # Add more videos here...
+  # - input: "source_videos/bnsw_vs_ripcity.mp4"
+  #   ranges:
+  #     - "0:00-10:00"
+  #     - "15:30-28:00"
+# Time format: MM:SS or HH:MM:SS
+# Example ranges:
+#   "5:30-20:00"      -> 5min 30sec to 20min 0sec
+#   "1:05:30-1:25:00" -> 1hr 5min 30sec to 1hr 25min 0sec

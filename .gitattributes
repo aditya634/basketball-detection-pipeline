@@ -1,0 +1,25 @@
+# Ensure consistent line endings across platforms
+* text=auto
+
+# Treat shell and scripts as text
+*.sh text eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+
+# Common data files
+*.csv text
+*.json text
+*.yaml text
+*.yml text
+
+# Images and binaries
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.mp4 binary
+*.avi binary
+*.mkv binary
+*.mov binary
+*.pt binary
+*.onnx binary
