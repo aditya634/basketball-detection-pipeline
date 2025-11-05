@@ -213,11 +213,27 @@ def copy_untrimmed_videos(source_videos: List[Path], videos_to_trim: Dict[str, L
     """Copy videos that weren't trimmed to all_video_frames/videoname/"""
     import shutil
     
-    # Get list of videos that were NOT trimmed
+    # Get list of videos that already have folders (were trimmed previously)
+    already_trimmed = get_already_trimmed_videos()
+    
+    # Get list of videos that were NOT trimmed in this run AND don't already have folders
     trimmed_paths = set(videos_to_trim.keys())
-    untrimmed_videos = [v for v in source_videos if str(v) not in trimmed_paths]
+    untrimmed_videos = [v for v in source_videos 
+                       if str(v) not in trimmed_paths 
+                       and v.stem not in already_trimmed]
+    
+    # Count videos being skipped (already have folders)
+    skipped_videos = [v for v in source_videos 
+                     if str(v) not in trimmed_paths 
+                     and v.stem in already_trimmed]
+    
+    if skipped_videos:
+        logger.info(f"\nSkipping {len(skipped_videos)} video(s) (already have folders in all_video_frames/)")
+        for video in skipped_videos:
+            logger.info(f"  ⏭️  {video.name}")
     
     if not untrimmed_videos:
+        logger.info("No new videos to copy")
         return True
     
     logger.info(f"\nCopying {len(untrimmed_videos)} untrimmed video(s) to all_video_frames/")
