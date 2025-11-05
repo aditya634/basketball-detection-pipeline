@@ -321,11 +321,17 @@ def interactive_mode():
         logger.warning("\nNo videos to process.")
         return 0
     
+    # Calculate videos that will be copied (not trimmed AND not already processed)
+    videos_to_copy = [v for v in source_videos 
+                     if str(v) not in videos_to_trim.keys() 
+                     and v.stem not in already_trimmed]
+    
     # Configuration
     print("\n" + "-"*70)
     print("Pipeline Configuration:")
     print(f"  Videos to trim: {len(videos_to_trim)}")
-    print(f"  Videos to copy (no trimming): {len(source_videos) - len(videos_to_trim)}")
+    print(f"  Videos to copy (no trimming): {len(videos_to_copy)}")
+    print(f"  Already trimmed (skipped): {len(already_trimmed)}")
     
     batch_size = input("  Ball detection batch size (default 32): ").strip() or "32"
     device = input("  Device (0 for GPU, cpu for CPU, default 0): ").strip() or "0"
@@ -363,20 +369,28 @@ def interactive_mode():
             logger.error("Stage 1 failed. Stopping pipeline.")
             return 1
     
-    # Stage 2: Extract frames (only from newly trimmed videos if any were trimmed)
-    if trimmed_folders:
-        logger.info(f"\n=== Processing {len(trimmed_folders)} newly trimmed video(s) ===")
-        if not stage2_extract_frames(only_from_folders=trimmed_folders):
+    # Add folders for videos that were copied (not trimmed)
+    # These are videos the user said "no" to trimming in this run
+    copied_folders = [f"data/all_video_frames/{v.stem}" for v in videos_to_copy]
+    
+    # Combine trimmed and copied folders for processing
+    folders_to_process = trimmed_folders + copied_folders
+    
+    # Stage 2: Extract frames (from newly trimmed AND newly copied videos)
+    if folders_to_process:
+        logger.info(f"\n=== Processing {len(folders_to_process)} video folder(s) ===")
+        logger.info(f"  - Trimmed: {len(trimmed_folders)}")
+        logger.info(f"  - Copied (full videos): {len(copied_folders)}")
+        if not stage2_extract_frames(only_from_folders=folders_to_process):
             logger.error("Stage 2 failed. Stopping pipeline.")
             return 1
     else:
-        # No trimming happened, process all videos (legacy behavior)
-        if not stage2_extract_frames():
-            logger.error("Stage 2 failed. Stopping pipeline.")
-            return 1
+        # No new videos to process
+        logger.warning("No new videos to process in this run.")
+        return 0
     
     # Stage 3: Ball detection (only on newly extracted frames)
-    if not stage3_ball_detection(only_from_folders=trimmed_folders if trimmed_folders else None, 
+    if not stage3_ball_detection(only_from_folders=folders_to_process if folders_to_process else None, 
                                   batch_size=batch_size, device=device):
         logger.error("Stage 3 failed. Stopping pipeline.")
         return 1
